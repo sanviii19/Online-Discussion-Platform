@@ -235,7 +235,7 @@ $user = User::getUser($_SESSION['user_id']);
             </form>
             
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center">
-                <a href="index.php" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
+                <a href="discussions.php" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
                     <i class="fas fa-arrow-left mr-1"></i> Back to Discussions
                 </a>
                 <a href="logout.php" class="text-red-600 hover:text-red-800 font-medium transition duration-150 mt-2 sm:mt-0">

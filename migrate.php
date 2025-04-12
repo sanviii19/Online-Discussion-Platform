@@ -75,7 +75,19 @@ CREATE TABLE IF NOT EXISTS files (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES study_groups(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    content_type ENUM('discussion', 'reply'),
+    content_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 ";
+
+
 
 // Execute Queries One by One
 $queries = explode(";", $sql);
