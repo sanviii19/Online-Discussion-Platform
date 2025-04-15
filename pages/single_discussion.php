@@ -212,6 +212,12 @@ if ($isLoggedIn) {
                             <button onclick="shareDiscussion()" class="flex items-center text-sm text-gray-500 hover:text-indigo-600 transition duration-150">
                                 <i class="fas fa-share mr-1"></i> Share
                             </button>
+                            
+                            <?php if($isLoggedIn): ?>
+                                <button onclick="askAi()" class="flex items-center text-sm text-blue-600 hover:text-blue-800 transition duration-150">
+                                    <i class="fas fa-robot mr-1"></i> <span id="aiButtonText">Ask AI</span>
+                                </button>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="text-sm text-gray-500">
@@ -361,7 +367,34 @@ if ($isLoggedIn) {
         </p>
     </div>
 
+    <!-- AI Response Modal (Hidden by default) -->
+    <div id="aiResponseSection" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="fixed inset-0 bg-black/10 bg-opacity-50" onclick="toggleAiResponse()"></div>
+        <div class="content-container rounded-xl shadow-2xl overflow-hidden transition-all duration-300 max-w-2xl w-full mx-4 relative z-10">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-white">
+                        <i class="fas fa-robot mr-2"></i> AI Response
+                    </h3>
+                    <button onclick="toggleAiResponse()" class="text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 bg-white">
+                <div id="aiResponseContent" class="bg-gray-50 rounded-lg border border-gray-200 p-4 prose prose-indigo max-w-none">
+                    <div id="aiLoadingIndicator" class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        <span class="ml-3 text-gray-600">Generating AI response...</span>
+                    </div>
+                    <div id="aiResponseText" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Existing functions
         function quoteReply(replyId) {
             const replyElement = document.getElementById('reply-' + replyId);
             const replyContent = replyElement.querySelector('.reply-content').textContent.trim();
@@ -376,13 +409,104 @@ if ($isLoggedIn) {
         }
         
         function shareDiscussion() {
-            // Copy current URL to clipboard
             navigator.clipboard.writeText(window.location.href).then(() => {
                 alert('Link copied to clipboard!');
             }).catch(err => {
                 console.error('Could not copy text: ', err);
             });
         }
+
+        // Simplified AI Response Functions
+        const API_KEY = "AIzaSyD7roQlayvnjQRp88Ej-BsQYGMnk_Ja9xw";
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+        let aiResponseVisible = false;
+
+        function toggleAiResponse() {
+            const aiSection = document.getElementById('aiResponseSection');
+            const aiButton = document.getElementById('aiButtonText');
+            
+            if (aiResponseVisible) {
+                aiSection.classList.add('hidden');
+                aiButton.textContent = 'Ask AI';
+            } else {
+                aiSection.classList.remove('hidden');
+                aiButton.textContent = 'Hide AI';
+                getAiResponse();
+            }
+            
+            aiResponseVisible = !aiResponseVisible;
+        }
+
+        function askAi() {
+            toggleAiResponse();
+        }
+
+        async function getAiResponse() {
+            // Show loading indicator
+            document.getElementById('aiLoadingIndicator').classList.remove('hidden');
+            document.getElementById('aiResponseText').classList.add('hidden');
+            
+            // Get discussion content
+            const discussionTitle = "<?= addslashes(htmlspecialchars($discussion['title'])) ?>";
+            const discussionContent = "<?= addslashes(str_replace("\n", " ", htmlspecialchars($discussion['content']))) ?>";
+            
+            // Create a custom prompt
+            const customPrompt = `You are a helpful AI assistant providing insights about discussions. 
+Here's the discussion:
+
+Title: ${discussionTitle}
+Content: ${discussionContent}
+
+Please provide a concise, helpful response (maximum 1000 characters) that:
+1. Summarizes the key points
+2. Offers additional relevant information
+3. Suggests related topics or questions for further discussion
+
+Keep your response informative but brief.`;
+
+            try {
+                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                role: "user",
+                                parts: [{ text: customPrompt }]
+                            }
+                        ],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1000,
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Hide loading indicator
+                document.getElementById('aiLoadingIndicator').classList.add('hidden');
+                document.getElementById('aiResponseText').classList.remove('hidden');
+                
+                if (data.candidates && data.candidates[0].content) {
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    document.getElementById('aiResponseText').innerHTML = marked.parse(aiText);
+                } else {
+                    document.getElementById('aiResponseText').innerHTML = '<p class="text-red-600">Sorry, I couldn\'t generate a response. Please try again later.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error fetching AI response:', error);
+                document.getElementById('aiLoadingIndicator').classList.add('hidden');
+                document.getElementById('aiResponseText').classList.remove('hidden');
+                document.getElementById('aiResponseText').innerHTML = `<p class="text-red-600">Error: ${error.message || 'Something went wrong. Please try again.'}</p>`;
+            }
+        }
     </script>
+
+    <!-- Add marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
