@@ -65,16 +65,6 @@ CREATE TABLE IF NOT EXISTS replies (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS files (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    group_id INT,
-    file_name VARCHAR(255),
-    file_path VARCHAR(255),
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES study_groups(id) ON DELETE CASCADE
-);
 
 CREATE TABLE IF NOT EXISTS likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,6 +74,23 @@ CREATE TABLE IF NOT EXISTS likes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS files (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    group_id INT,
+    content_type ENUM('group', 'discussion', 'reply') DEFAULT 'reply',
+    content_id INT,
+    file_name VARCHAR(255),
+    file_type VARCHAR(50),
+    file_size INT,
+    file_path VARCHAR(255),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES study_groups(id) ON DELETE CASCADE
+);
+
 
 ";
 

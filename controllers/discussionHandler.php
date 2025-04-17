@@ -12,6 +12,7 @@ require_once "../models/Discussion.PHP";
 require_once "../models/Reply.php";
 require_once "../models/Likes.php";
 require_once "../models/Group.php";
+require_once "../models/File.php";
 
 // Debug info - uncomment this to see what's coming in
 file_put_contents('debug_post.txt', print_r($_POST, true));
@@ -103,36 +104,50 @@ if (isset($_POST['delete_discussion'])) {
     exit();
 }
 
-// Handle add reply
 if (isset($_POST['add_reply'])) {
-    $discussionId = isset($_POST['discussion_id']) ? intval($_POST['discussion_id']) : 0;
-    $content = trim($_POST['content'] ?? '');
-    
-    // Validate input
-    if (empty($content)) {
-        header("Location: ../pages/single_discussion.php?id=$discussionId&error=empty_reply");
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: ../pages/login.php');
         exit();
     }
     
-    // Check if user is member of the group via the discussion
+    $discussionId = isset($_POST['discussion_id']) ? intval($_POST['discussion_id']) : 0;
+    $content = $_POST['content'] ?? '';
+    
+    if (empty($content) && empty($_FILES['attachments']['name'][0])) {
+        header('Location: ../pages/single_discussion.php?id=' . $discussionId . '&error=empty_reply');
+        exit();
+    }
+    
+    // Check if member of group
     $discussion = Discussion::getById($discussionId);
     if (!$discussion) {
-        header("Location: ../pages/discussions.php");
+        header('Location: ../pages/groups.php');
         exit();
     }
     
     $groupId = $discussion['group_id'];
     $memberRole = Group::getMemberRole($groupId, $_SESSION['user_id']);
+    
     if (!$memberRole) {
-        header("Location: ../pages/single_discussion.php?id=$discussionId&error=unauthorized");
+        header('Location: ../pages/single_discussion.php?id=' . $discussionId . '&error=unauthorized');
         exit();
     }
     
-    // Add reply
-    if (Reply::create($discussionId, $_SESSION['user_id'], $content)) {
-        header("Location: ../pages/single_discussion.php?id=$discussionId&success=reply_added");
+    // Debug: Log the files data
+    error_log("FILES data: " . print_r($_FILES, true));
+    
+    // Handle with file uploads (add proper error handling)
+    $replyId = Reply::createWithFiles(
+        $discussionId, 
+        $_SESSION['user_id'], 
+        $content, 
+        isset($_FILES['attachments']) ? $_FILES['attachments'] : []
+    );
+    
+    if ($replyId) {
+        header('Location: ../pages/single_discussion.php?id=' . $discussionId . '&success=reply_added#reply-' . $replyId);
     } else {
-        header("Location: ../pages/single_discussion.php?id=$discussionId&error=reply_failed");
+        header('Location: ../pages/single_discussion.php?id=' . $discussionId . '&error=reply_failed');
     }
     exit();
 }
@@ -229,6 +244,53 @@ if (isset($_POST['toggle_like'])) {
     }
     
     header("Location: $redirectUrl");
+    exit();
+}
+
+// Add a handler for file deletion
+if (isset($_POST['delete_file'])) {
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: ../pages/login.php');
+        exit();
+    }
+    
+    $fileId = isset($_POST['file_id']) ? intval($_POST['file_id']) : 0;
+    
+    // Get file info
+    $file = File::getById($fileId);
+    
+    if (!$file) {
+        echo json_encode(['success' => false, 'message' => 'File not found']);
+        exit();
+    }
+    
+    // Check if user is allowed to delete this file
+    $canDelete = false;
+    
+    // User is file owner
+    if ($file['user_id'] == $_SESSION['user_id']) {
+        $canDelete = true;
+    }
+    
+    // Or user is admin of the group
+    if (!$canDelete && $file['group_id']) {
+        $memberRole = Group::getMemberRole($file['group_id'], $_SESSION['user_id']);
+        if ($memberRole === 'admin') {
+            $canDelete = true;
+        }
+    }
+    
+    if (!$canDelete) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit();
+    }
+    
+    if (File::delete($fileId)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to delete file']);
+    }
+    
     exit();
 }
 

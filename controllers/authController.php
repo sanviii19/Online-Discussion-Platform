@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (isset($_POST['login'])) {
         if (User::login($_POST['email'], $_POST['password'])) {
-            header("Location: profile.php");
+            header("Location: groups.php");
         } else {
             header("Location: login.php?error=invalid");
         }

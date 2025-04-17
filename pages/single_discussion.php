@@ -5,6 +5,19 @@ require_once "../models/Discussion.php";
 require_once "../models/Reply.php";
 require_once "../models/Group.php";
 require_once "../models/Likes.php";
+require_once "../models/File.php";
+
+
+// Function to make URLs clickable
+function makeLinksClickable($text) {
+    // Regular expression to match URLs
+    $pattern = '/(https?:\/\/[^\s]+)/i';
+    
+    // Replace URLs with HTML anchor tags
+    $replacement = '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline break-words">$1</a>';
+    
+    return preg_replace($pattern, $replacement, $text);
+}
 
 // Check if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
@@ -186,7 +199,7 @@ if ($isLoggedIn) {
                     </div>
                     
                     <div class="prose prose-indigo max-w-none text-gray-700 mb-4">
-                        <?= nl2br(htmlspecialchars($discussion['content'])) ?>
+                        <?= nl2br(makeLinksClickable(htmlspecialchars($discussion['content']))) ?>
                     </div>
                     
                     <div class="flex items-center justify-between border-t border-gray-200 pt-4 mt-4">
@@ -259,7 +272,47 @@ if ($isLoggedIn) {
                                     </div>
                                     
                                     <div class="prose prose-indigo max-w-none text-gray-700 mt-2 mb-2 reply-content">
-                                        <?= nl2br(htmlspecialchars($reply['content'])) ?>
+                                        <?= nl2br(makeLinksClickable(htmlspecialchars($reply['content']))) ?>
+                                        
+                                        <?php
+                                        // Get files attached to this reply
+                                        $files = Reply::getFiles($reply['id']);
+                                        if (!empty($files)):
+                                        ?>
+                                        <div class="mt-3 pt-3 border-t border-gray-200">
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-paperclip mr-1"></i> Attachments (<?= count($files) ?>)
+                                            </h4>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <?php foreach ($files as $file): ?>
+                                                    <?php 
+                                                        $fileIcon = File::getFileIcon(pathinfo($file['file_name'], PATHINFO_EXTENSION));
+                                                        $isImage = in_array(strtolower(pathinfo($file['file_name'], PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                    ?>
+                                                    <div class="flex items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                                                        <div class="mr-3 text-center">
+                                                            <i class="fas <?= $fileIcon ?> text-2xl <?= $isImage ? 'text-green-500' : 'text-blue-500' ?>"></i>
+                                                        </div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <a href="../<?= $file['file_path'] ?>" target="_blank" class="block text-sm font-medium text-blue-600 hover:text-blue-800 truncate">
+                                                                <?= htmlspecialchars($file['file_name']) ?>
+                                                            </a>
+                                                            <div class="flex items-center text-xs text-gray-500">
+                                                                <span><?= File::formatSize($file['file_size']) ?></span>
+                                                                <span class="mx-1">•</span>
+                                                                <span><?= date('M d, Y', strtotime($file['uploaded_at'])) ?></span>
+                                                            </div>
+                                                        </div>
+                                                        <?php if($isLoggedIn && ($file['user_id'] == $_SESSION['user_id'] || $memberRole === 'admin')): ?>
+                                                            <button onclick="deleteFile(<?= $file['id'] ?>)" class="ml-2 text-red-500 hover:text-red-700">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <div class="flex items-center justify-between border-t border-gray-200 pt-3 mt-3">
@@ -308,18 +361,42 @@ if ($isLoggedIn) {
                 
                 <!-- Reply Form -->
                 <?php if($isLoggedIn && $memberRole): ?>
-                    <div id="replyForm" class="bg-gray-50 rounded-lg border border-gray-200 p-5">
+                    <div id="replyForm" class="bg-gray-50 rounded-lg border border-gray-200 p-5 mt-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-3">
                             <i class="fas fa-reply text-indigo-600 mr-2"></i> Add Your Reply
                         </h3>
                         
-                        <form action="../controllers/discussionHandler.php" method="POST">
+                        <form action="../controllers/discussionHandler.php" method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="discussion_id" value="<?= $discussionId ?>">
                             
                             <div class="mb-4">
-                                <textarea name="content" id="replyContent" rows="5" required
+                                <textarea name="content" id="replyContent" rows="5"
                                           class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
                                           placeholder="Write your reply here..."></textarea>
+                            </div>
+                            
+                            <!-- File Upload Section -->
+                            <div class="mb-4">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-paperclip text-gray-500 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-700">Attachments</span>
+                                </div>
+                                
+                                <div class="file-upload-container border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition">
+                                    <div class="flex flex-col items-center justify-center cursor-pointer" id="dropzone">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                        <p class="text-sm text-gray-500 mb-1">Drag and drop files here or click to browse</p>
+                                        <p class="text-xs text-gray-400">Supported formats: PDF, Images, Documents (Max 10MB)</p>
+                                        
+                                        <input type="file" name="attachments[]" id="file-upload" class="hidden" multiple 
+                                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif">
+                                    </div>
+                                    
+                                    <div class="mt-3 hidden" id="selected-files">
+                                        <div class="text-xs font-medium text-gray-700 mb-2">Selected Files:</div>
+                                        <ul id="file-list" class="space-y-1"></ul>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="flex justify-end">
@@ -331,21 +408,19 @@ if ($isLoggedIn) {
                         </form>
                     </div>
                 <?php elseif(!$isLoggedIn): ?>
-                    <div class="bg-blue-50 rounded-lg border border-blue-200 p-5 text-center">
-                        <h3 class="text-lg font-semibold text-blue-800 mb-2">Join the Discussion</h3>
-                        <p class="text-blue-700 mb-3">Sign in to reply to this discussion and interact with other members.</p>
-                        <a href="login.php" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-150">
-                            <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+                    <div class="bg-gray-50 rounded-lg border border-gray-200 p-5 text-center mt-6">
+                        <p class="text-gray-700 mb-3">You need to be logged in to reply to discussions.</p>
+                        <a href="../pages/login.php" class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-150">
+                            Login to Reply
                         </a>
                     </div>
                 <?php else: ?>
-                    <div class="bg-yellow-50 rounded-lg border border-yellow-200 p-5 text-center">
-                        <h3 class="text-lg font-semibold text-yellow-800 mb-2">Join This Group</h3>
-                        <p class="text-yellow-700 mb-3">You need to be a member of this group to participate in discussions.</p>
-                        <form action="../controllers/groupController.php" method="POST" class="inline">
+                    <div class="bg-gray-50 rounded-lg border border-gray-200 p-5 text-center mt-6">
+                        <p class="text-gray-700 mb-3">You need to be a member of this group to reply to discussions.</p>
+                        <form action="../controllers/groupController.php" method="POST">
                             <input type="hidden" name="group_id" value="<?= $groupId ?>">
-                            <button type="submit" name="join_group" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-150">
-                                <i class="fas fa-user-plus mr-2"></i> Join Group
+                            <button type="submit" name="join_group" class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-150">
+                                Join Group
                             </button>
                         </form>
                     </div>
@@ -502,6 +577,140 @@ Keep your response informative but brief.`;
                 document.getElementById('aiLoadingIndicator').classList.add('hidden');
                 document.getElementById('aiResponseText').classList.remove('hidden');
                 document.getElementById('aiResponseText').innerHTML = `<p class="text-red-600">Error: ${error.message || 'Something went wrong. Please try again.'}</p>`;
+            }
+        }
+
+        // File Upload Handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file-upload');
+            const fileList = document.getElementById('file-list');
+            const selectedFiles = document.getElementById('selected-files');
+            
+            if (dropzone && fileInput) {
+                // Click to browse
+                dropzone.addEventListener('click', function(e) {
+                    fileInput.click();
+                });
+                
+                // Drag and drop
+                dropzone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    dropzone.classList.add('bg-blue-50', 'border-blue-300');
+                });
+                
+                dropzone.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    dropzone.classList.remove('bg-blue-50', 'border-blue-300');
+                });
+                
+                dropzone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    dropzone.classList.remove('bg-blue-50', 'border-blue-300');
+                    
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        updateFileList();
+                    }
+                });
+                
+                // File selection change
+                fileInput.addEventListener('change', updateFileList);
+                
+                function updateFileList() {
+                    fileList.innerHTML = '';
+                    
+                    if (fileInput.files.length > 0) {
+                        selectedFiles.classList.remove('hidden');
+                        
+                        for (let i = 0; i < fileInput.files.length; i++) {
+                            const file = fileInput.files[i];
+                            const fileSize = formatFileSize(file.size);
+                            const fileType = file.name.split('.').pop().toLowerCase();
+                            const fileIcon = getFileIconClass(fileType);
+                            
+                            const fileItem = document.createElement('li');
+                            fileItem.className = 'flex items-center text-xs';
+                            fileItem.innerHTML = `
+                                <i class="fas ${fileIcon} text-indigo-500 mr-2"></i>
+                                <span class="truncate max-w-xs">${file.name}</span>
+                                <span class="ml-auto text-gray-500">${fileSize}</span>
+                            `;
+                            
+                            fileList.appendChild(fileItem);
+                        }
+                    } else {
+                        selectedFiles.classList.add('hidden');
+                    }
+                }
+                
+                function formatFileSize(bytes) {
+                    if (bytes === 0) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                }
+                
+                function getFileIconClass(extension) {
+                    const iconMap = {
+                        'pdf': 'fa-file-pdf',
+                        'doc': 'fa-file-word', 'docx': 'fa-file-word',
+                        'xls': 'fa-file-excel', 'xlsx': 'fa-file-excel',
+                        'ppt': 'fa-file-powerpoint', 'pptx': 'fa-file-powerpoint',
+                        'jpg': 'fa-file-image', 'jpeg': 'fa-file-image', 'png': 'fa-file-image', 
+                        'gif': 'fa-file-image', 'svg': 'fa-file-image', 'webp': 'fa-file-image',
+                        'mp4': 'fa-file-video', 'avi': 'fa-file-video', 'mov': 'fa-file-video',
+                        'mp3': 'fa-file-audio', 'wav': 'fa-file-audio', 'ogg': 'fa-file-audio',
+                        'zip': 'fa-file-archive', 'rar': 'fa-file-archive', '7z': 'fa-file-archive',
+                        'txt': 'fa-file-alt'
+                    };
+                    
+                    return iconMap[extension] || 'fa-file';
+                }
+            }
+        });
+
+        // Add this to debug the file selection 
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file-upload');
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    console.log('Files selected:', this.files);
+                });
+                
+                const form = fileInput.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        console.log('Form submitted with files:', fileInput.files);
+                    });
+                }
+            }
+        });
+
+        // File Deletion
+        function deleteFile(fileId) {
+            if (confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+                fetch('../controllers/discussionHandler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `delete_file=true&file_id=${fileId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Could not delete file'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the file');
+                });
             }
         }
     </script>
