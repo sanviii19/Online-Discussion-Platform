@@ -29,7 +29,7 @@ if ($isLoggedIn) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discussion Platform - Study Group Collaboration</title>
+    <title>Konvo - Study Group Collaboration</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -187,7 +187,7 @@ if ($isLoggedIn) {
                     </linearGradient>
                 </defs>
             </svg>
-            <span class="text-xl font-bold gradient-text">Discussion Platform</span>
+            <span class="text-xl font-bold gradient-text">Konvo</span>
         </div>
         <div class="hidden md:flex items-center space-x-8">
             <a href="#features" class="nav-link text-gray-700 font-medium">Features</a>
@@ -210,7 +210,7 @@ if ($isLoggedIn) {
                 <h1 class="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
                     Learn Together <span class="gradient-text">Grow Together</span>
                 </h1>
-                <p class="text-xl text-gray-600 mb-8">Join study groups, collaborate in real-time, and elevate your academic experience with our modern discussion platform.</p>
+                <p class="text-xl text-gray-600 mb-8">Join study groups, collaborate in real-time, and elevate your academic experience with our modern Konvo.</p>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <a href="pages/register.php" class="cta-button py-4 px-8 rounded-xl text-white font-semibold text-lg text-center">
                         <i class="fas fa-user-plus mr-2"></i> Get Started Free
@@ -477,7 +477,7 @@ if ($isLoggedIn) {
                                 </linearGradient>
                             </defs>
                         </svg>
-                        <span class="text-xl font-bold gradient-text">Discussion Platform</span>
+                        <span class="text-xl font-bold gradient-text">Konvo</span>
                     </div>
                     <p class="text-gray-400 mb-4">The modern platform for student collaboration and group study.</p>
                     <div class="flex space-x-4">
@@ -530,7 +530,7 @@ if ($isLoggedIn) {
             </div>
             
             <div class="pt-8 border-t border-gray-800 text-center text-gray-400">
-                &copy; <?php echo date('Y'); ?> Discussion Platform. All rights reserved.
+                &copy; <?php echo date('Y'); ?> Konvo. All rights reserved.
             </div>
         </div>
     </footer>

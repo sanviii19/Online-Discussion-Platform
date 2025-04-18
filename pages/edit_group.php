@@ -37,7 +37,7 @@ if ($memberRole !== 'admin') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Group - Discussion Platform</title>
+    <title>Edit Group - Konvo</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -65,14 +65,19 @@ if ($memberRole !== 'admin') {
                         <h2 class="text-2xl font-bold text-white">Edit Group</h2>
                         <p class="text-blue-100 mt-1">Update <?= htmlspecialchars($group['name']) ?> settings</p>
                     </div>
-                    <div class="bg-white rounded-full p-3 shadow-lg">
-                        <svg width="40" height="40" viewBox="0 0 82 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle logoDesc" role="img">
-                            <title id="logoTitle">Discussion Platform Logo</title>
-                            <desc id="logoDesc">An abstract logo representing the discussion platform</desc>
-                            <!-- SVG paths here -->
-                        </svg>
+                    <svg class="w-10 h-10 mr-3" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 5C11.729 5 5 11.729 5 20C5 28.271 11.729 35 20 35C28.271 35 35 28.271 35 20C35 11.729 28.271 5 20 5Z" fill="url(#paint0_linear)"/>
+                <path d="M15 16C16.1046 16 17 15.1046 17 14C17 12.8954 16.1046 12 15 12C13.8954 12 13 12.8954 13 14C13 15.1046 13.8954 16 15 16Z" fill="white"/>
+                <path d="M25 16C26.1046 16 27 15.1046 27 14C27 12.8954 26.1046 12 25 12C23.8954 12 23 12.8954 23 14C23 15.1046 23.8954 16 25 16Z" fill="white"/>
+                <path d="M15 28H25M15 22C15 24.2091 17.2386 26 20 26C22.7614 26 25 24.2091 25 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="paint0_linear" x1="5" y1="5" x2="35" y2="35" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="1" stop-color="#A855F7"/>
+                    </linearGradient>
+                </defs>
+            </svg>
                     </div>
-                </div>
             </div>
             
             <?php if(isset($_GET['error'])): ?>
@@ -170,7 +175,7 @@ if ($memberRole !== 'admin') {
         </div>
         
         <p class="text-center mt-8 text-white text-sm">
-            © 2025 Discussion Platform. All rights reserved.
+            © 2025 Konvo. All rights reserved.
         </p>
     </div>
     

@@ -238,7 +238,7 @@ if ($isLoggedIn) {
                         </linearGradient>
                     </defs>
                 </svg>
-                <span class="text-xl font-bold gradient-text">Discussion Platform</span>
+                <span class="text-xl font-bold gradient-text">Konvo</span>
             </div>
             
             <div class="hidden md:flex pl-96 items-center space-x-8">

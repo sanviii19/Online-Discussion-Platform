@@ -1,0 +1,6 @@
+Array
+(
+    [content_type] => discussion
+    [content_id] => 5
+    [toggle_like] => 
+)

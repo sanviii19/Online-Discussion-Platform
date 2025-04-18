@@ -47,7 +47,7 @@ $discussions = Discussion::getByGroupId($groupId);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($group['name']) ?> - Discussion Platform</title>
+    <title><?= htmlspecialchars($group['name']) ?> - Konvo</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -234,9 +234,9 @@ $discussions = Discussion::getByGroupId($groupId);
                                                 
                                                 <div class="flex items-center justify-between text-xs text-gray-500">
                                                     <div class="flex items-center">
-                                                        <img class="h-6 w-6 rounded-full object-cover mr-2" 
+                                                        <!-- <img class="h-6 w-6 rounded-full object-cover mr-2" 
                                                              src="../public/uploads/avatars/default.png" 
-                                                             alt="<?= htmlspecialchars($discussion['author_name']) ?>">
+                                                             alt="<?= htmlspecialchars($discussion['author_name']) ?>"> -->
                                                         <span>Started by <?= htmlspecialchars($discussion['author_name']) ?></span>
                                                     </div>
                                                     <span><?= date('M d, Y', strtotime($discussion['created_at'])) ?></span>
@@ -351,7 +351,7 @@ $discussions = Discussion::getByGroupId($groupId);
         </div>
         
         <p class="text-center mt-8 text-white text-sm">
-            © 2025 Discussion Platform. All rights reserved.
+            © 2025 Konvo. All rights reserved.
         </p>
     </div>
     
