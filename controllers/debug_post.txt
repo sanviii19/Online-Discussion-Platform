@@ -1,5 +1,5 @@
 Array
 (
-    [discussion_id] => 2
-    [delete_discussion] => 
+    [reply_id] => 7
+    [delete_reply] => 
 )

@@ -87,6 +87,7 @@ if ($isLoggedIn) {
             max-width: 100%;
             height: auto;
         }
+        
     </style>
 </head>
 <body class="min-h-screen bg-gray-50 py-6">
@@ -260,21 +261,36 @@ if ($isLoggedIn) {
                         </div>
                     </div>
                 </div>
-                <div id="aiResponseSection" class="p-4 border rounded hidden bg-gray-50 mt-4">
-    <div id="chatMessages" class="h-60 overflow-y-auto mb-4 bg-white p-3 rounded shadow-inner"></div>
+                <div id="aiResponseSection" class="p-4 border rounded-2xl hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 mt-4 mb-4 shadow-lg">
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="h-60 overflow-y-auto mb-4 bg-white p-4 rounded-3xl shadow-inner border border-gray-200">
+                        <!-- Example Message -->
+                        <div class="flex justify-start">
+                            <div class="max-w-xs px-4 py-2 rounded-lg shadow bg-indigo-100 text-gray-800">
+                                <div class="text-xs font-medium mb-1">AI</div>
+                                <div class="text-sm">Hello! How can I assist you today?</div>
+                            </div>
+                        </div>
+                </div>
 
-    <div class="flex gap-2">
-        <input id="userInput" type="text" class="flex-1 border p-2 rounded" placeholder="Type your message...">
-        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Send</button>
-    </div>
+    <div class="flex gap-2 items-center bg-white p-3 rounded-lg shadow-md border border-gray-200">
+    <input id="userInput" 
+           type="text" 
+           class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 text-gray-700 placeholder-gray-400" 
+           placeholder="Type your message...">
+    <button onclick="sendMessage()" 
+            class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-6 py-2 rounded-lg shadow hover:from-indigo-600 hover:to-blue-700 transition duration-200 flex items-center gap-2">
+        <i class="fas fa-paper-plane"></i> Send
+    </button>
+</div>
 
-    <div id="aiLoadingIndicator" class="mt-2 hidden">
-    <div class="flex items-center gap-2 text-sm text-gray-500">
-        <span>AI is typing</span>
+<div id="aiLoadingIndicator" class="mt-2 hidden">
+    <div class="flex items-center gap-3 text-sm text-gray-600">
+        <span class="font-medium text-indigo-600">AI is typing...</span>
         <div class="flex space-x-1">
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:.15s]"></div>
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:.3s]"></div>
+            <div class="w-3 h-3 bg-indigo-400 rounded-full animate-bounce"></div>
+            <div class="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:.15s]"></div>
+            <div class="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:.3s]"></div>
         </div>
     </div>
 </div>
@@ -483,31 +499,31 @@ if ($isLoggedIn) {
         </p>
     </div>
 
-    <!-- AI Response Modal (Hidden by default) -->
     <div id="aiResponseSection" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-        <div class="fixed inset-0 bg-black/10 bg-opacity-50" onclick="toggleAiResponse()"></div>
-        <div class="content-container rounded-xl shadow-2xl overflow-hidden transition-all duration-300 max-w-2xl w-full mx-4 relative z-10">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-white">
-                        <i class="fas fa-robot mr-2"></i> AI Response
-                    </h3>
-                    <button onclick="toggleAiResponse()" class="text-white hover:text-gray-200">
-                        <i class="fas fa-times"></i>
+         <div class="fixed inset-0 bg-black/10 bg-opacity-50" onclick="toggleAiResponse()"></div> 
+         <div class="content-container rounded-xl shadow-2xl overflow-hidden transition-all duration-300 max-w-2xl w-full mx-4 relative z-10">
+             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-4"> 
+                <div class="flex items-center justify-between"> 
+                    <h3 class="text-lg font-bold text-white"> 
+                        <i class="fas fa-robot mr-2"></i> AI Response 
+                    </h3> 
+                    <button onclick="toggleAiResponse()" class="text-white hover:text-gray-200"> 
+                        <i class="fas fa-times">
+                        </i> 
                     </button>
-                </div>
-            </div>
-            <div class="p-6 bg-white">
-                <div id="aiResponseContent" class="bg-gray-50 rounded-lg border border-gray-200 p-4 prose prose-indigo max-w-none">
-                    <div id="aiLoadingIndicator" class="flex items-center justify-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                        <span class="ml-3 text-gray-600">Generating AI response...</span>
-                    </div>
-                    <div id="aiResponseText" class="hidden"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+                 </div>
+                 </div> 
+                 <div class="p-6 bg-white">
+                     <div id="aiResponseContent" class="bg-gray-50 rounded-lg border border-gray-200 p-4 prose prose-indigo max-w-none">
+                         <div id="aiLoadingIndicator" class="flex items-center justify-center py-8">
+                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                              <span class="ml-3 text-gray-600">Generating AI response...</span> 
+                            </div>
+                             <div id="aiResponseText" class="hidden"></div>
+                             </div> 
+                            </div>
+                         </div>
+                         </div>
 
     <script>
         // Existing functions
@@ -566,12 +582,16 @@ function appendMessage(sender, message) {
 
     const isUser = sender === "You";
 
-    messageWrapper.className = `mb-2 flex ${isUser ? 'justify-end' : 'justify-start'}`;
+    messageWrapper.className = `mb-4 flex ${isUser ? 'justify-end' : 'justify-start'}`;
     messageWrapper.innerHTML = `
-        <div class="max-w-xs px-4 py-2 rounded-lg shadow ${isUser ? 'bg-blue-100 text-right text-gray-900' : 'bg-gray-200 text-left text-gray-800'}">
-            <div class="text-xs mb-1 font-medium">${sender}</div>
-            <div class="text-sm whitespace-pre-wrap">${message}</div>
-        </div>
+    <div class="max-w-xs px-4 py-3 rounded-lg shadow-inner border border-gray-200 ${
+        isUser ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-right' : 'bg-indigo-100 text-gray-800 text-left'
+    }">
+        <div class="text-xs font-medium mb-1 ${
+            isUser ? 'text-indigo-200' : 'text-gray-500'
+        }">${sender}</div>
+        <div class="text-sm leading-relaxed whitespace-pre-wrap">${message}</div>
+    </div>
     `;
 
     chatBox.appendChild(messageWrapper);
