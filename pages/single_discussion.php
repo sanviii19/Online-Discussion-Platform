@@ -260,6 +260,26 @@ if ($isLoggedIn) {
                         </div>
                     </div>
                 </div>
+                <div id="aiResponseSection" class="p-4 border rounded hidden bg-gray-50 mt-4">
+    <div id="chatMessages" class="h-60 overflow-y-auto mb-4 bg-white p-3 rounded shadow-inner"></div>
+
+    <div class="flex gap-2">
+        <input id="userInput" type="text" class="flex-1 border p-2 rounded" placeholder="Type your message...">
+        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Send</button>
+    </div>
+
+    <div id="aiLoadingIndicator" class="mt-2 hidden">
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+        <span>AI is typing</span>
+        <div class="flex space-x-1">
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:.15s]"></div>
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:.3s]"></div>
+        </div>
+    </div>
+</div>
+
+</div>
                 
                 <!-- Replies -->
                 <div class="mb-6">
@@ -513,93 +533,95 @@ if ($isLoggedIn) {
         }
 
         // Simplified AI Response Functions
-        const API_KEY = "AIzaSyD7roQlayvnjQRp88Ej-BsQYGMnk_Ja9xw";
-        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-        let aiResponseVisible = false;
+        const API_KEY = "AIzaSyDVmRxa-pn6L_eQm2Xzwa28imHGFtvenZQ";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+let aiResponseVisible = false;
+let chatHistory = [];
 
-        function toggleAiResponse() {
-            const aiSection = document.getElementById('aiResponseSection');
-            const aiButton = document.getElementById('aiButtonText');
-            
-            if (aiResponseVisible) {
-                aiSection.classList.add('hidden');
-                aiButton.textContent = 'Ask AI';
-            } else {
-                aiSection.classList.remove('hidden');
-                aiButton.textContent = 'Hide AI';
-                getAiResponse();
-            }
-            
-            aiResponseVisible = !aiResponseVisible;
-        }
+function toggleAiResponse() {
+    const aiSection = document.getElementById('aiResponseSection');
+    const aiButton = document.getElementById('aiButtonText');
+    const inputBox = document.getElementById('userInput');
 
-        function askAi() {
-            toggleAiResponse();
-        }
+    if (aiResponseVisible) {
+        aiSection.classList.add('hidden');
+        aiButton.textContent = 'Ask AI';
+    } else {
+        aiSection.classList.remove('hidden');
+        aiButton.textContent = 'Hide AI';
+        setTimeout(() => inputBox.focus(), 100); // Wait for DOM to show
+    }
 
-        async function getAiResponse() {
-            // Show loading indicator
-            document.getElementById('aiLoadingIndicator').classList.remove('hidden');
-            document.getElementById('aiResponseText').classList.add('hidden');
-            
-            // Get discussion content
-            const discussionTitle = "<?= addslashes(htmlspecialchars($discussion['title'])) ?>";
-            const discussionContent = "<?= addslashes(str_replace("\n", " ", htmlspecialchars($discussion['content']))) ?>";
-            
-            // Create a custom prompt
-            const customPrompt = `You are a helpful AI assistant providing insights about discussions. 
-Here's the discussion:
+    aiResponseVisible = !aiResponseVisible;
+}
 
-Title: ${discussionTitle}
-Content: ${discussionContent}
 
-Please provide a concise, helpful response (maximum 1000 characters) that:
-1. Summarizes the key points
-2. Offers additional relevant information
-3. Suggests related topics or questions for further discussion
+function askAi() {
+    toggleAiResponse();
+}
 
-Keep your response informative but brief.`;
+function appendMessage(sender, message) {
+    const chatBox = document.getElementById('chatMessages');
+    const messageWrapper = document.createElement('div');
 
-            try {
-                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [
-                            {
-                                role: "user",
-                                parts: [{ text: customPrompt }]
-                            }
-                        ],
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 1000,
-                        }
-                    })
-                });
+    const isUser = sender === "You";
 
-                const data = await response.json();
-                
-                // Hide loading indicator
-                document.getElementById('aiLoadingIndicator').classList.add('hidden');
-                document.getElementById('aiResponseText').classList.remove('hidden');
-                
-                if (data.candidates && data.candidates[0].content) {
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    document.getElementById('aiResponseText').innerHTML = marked.parse(aiText);
-                } else {
-                    document.getElementById('aiResponseText').innerHTML = '<p class="text-red-600">Sorry, I couldn\'t generate a response. Please try again later.</p>';
+    messageWrapper.className = `mb-2 flex ${isUser ? 'justify-end' : 'justify-start'}`;
+    messageWrapper.innerHTML = `
+        <div class="max-w-xs px-4 py-2 rounded-lg shadow ${isUser ? 'bg-blue-100 text-right text-gray-900' : 'bg-gray-200 text-left text-gray-800'}">
+            <div class="text-xs mb-1 font-medium">${sender}</div>
+            <div class="text-sm whitespace-pre-wrap">${message}</div>
+        </div>
+    `;
+
+    chatBox.appendChild(messageWrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+
+async function sendMessage() {
+    const inputBox = document.getElementById('userInput');
+    const userMessage = inputBox.value.trim();
+    if (!userMessage) return;
+
+    appendMessage("You", userMessage);
+    inputBox.value = '';
+
+    chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+    document.getElementById('aiLoadingIndicator').classList.remove('hidden');
+
+    try {
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: chatHistory,
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1000,
                 }
-                
-            } catch (error) {
-                console.error('Error fetching AI response:', error);
-                document.getElementById('aiLoadingIndicator').classList.add('hidden');
-                document.getElementById('aiResponseText').classList.remove('hidden');
-                document.getElementById('aiResponseText').innerHTML = `<p class="text-red-600">Error: ${error.message || 'Something went wrong. Please try again.'}</p>`;
-            }
+            })
+        });
+
+        const data = await response.json();
+        document.getElementById('aiLoadingIndicator').classList.add('hidden');
+
+        if (data.candidates && data.candidates[0].content) {
+            const aiReply = data.candidates[0].content.parts[0].text;
+            appendMessage("AI", aiReply);
+            chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
+        } else {
+            appendMessage("AI", "Sorry, I couldn't generate a response.");
         }
+    } catch (error) {
+        document.getElementById('aiLoadingIndicator').classList.add('hidden');
+        console.error("AI error:", error);
+        appendMessage("AI", `Error: ${error.message}`);
+    }
+}
+
 
         // File Upload Handling
         document.addEventListener('DOMContentLoaded', function() {
