@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once "../controllers/groupController.php";
 require_once "../controllers/authController.php";
 
@@ -267,42 +268,62 @@ if ($isLoggedIn) {
         
         <!-- Main Content -->
         <main class="flex-grow container mx-auto px-4 py-6">
-            <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome Back</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome Back!</h1>
             
             <!-- Alerts -->
-            <?php if(isset($_GET['success'])): ?>
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-green-700">
-                                <?php 
-                                $message = "";
-                                switch($_GET['success']) {
-                                    case 'created':
-                                        $message = "Group created successfully!";
-                                        break;
-                                    case 'deleted':
-                                        $message = "Group deleted successfully!";
-                                        break;
-                                    case 'left':
-                                        $message = "You have left the group.";
-                                        break;
-                                    case 'request_sent':
-                                        $message = "Your request to join has been sent. Waiting for approval.";
-                                        break;
-                                    default:
-                                        $message = "Operation completed successfully!";
-                                }
-                                echo $message;
-                                ?>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
+            <style>
+    #success-message {
+        transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transition for transform and opacity */
+    }
+</style>
+
+<script>
+    // Set a timeout to hide the success message after 1.5 seconds with a smooth sideways transition
+    setTimeout(() => {
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.style.transform = 'translateX(100%)'; // Move the message sideways
+            successMessage.style.opacity = '0'; // Fade out the message
+            setTimeout(() => {
+                successMessage.style.display = 'none'; // Hide the element after the transition
+            }, 500); // Match the duration of the CSS transition
+        }
+    }, 1500);
+</script>
+
+<?php if(isset($_GET['success'])): ?>
+    <div id="success-message" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700">
+                    <?php 
+                    $message = "";
+                    switch($_GET['success']) {
+                        case 'created':
+                            $message = "Group created successfully!";
+                            break;
+                        case 'deleted':
+                            $message = "Group deleted successfully!";
+                            break;
+                        case 'left':
+                            $message = "You have left the group.";
+                            break;
+                        case 'request_sent':
+                            $message = "Your request to join has been sent. Waiting for approval.";
+                            break;
+                        default:
+                            $message = "Operation completed successfully!";
+                    }
+                    echo $message;
+                    ?>
+                </p>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
             
             <?php if(isset($_GET['error'])): ?>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">

@@ -80,34 +80,60 @@ $discussions = Discussion::getByGroupId($groupId);
             </svg>
                 </div>
             </div>
+
+
+            <style>
+    #success-message {
+        transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transition for transform and opacity */
+    }
+</style>
+
+
+
+<?php if(isset($_GET['success'])): ?>
+    <div id="success-message" class="bg-green-50 border-l-4 border-green-500 p-4 ">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700">
+                    <?php 
+                    $message = "";
+                    switch($_GET['success']) {
+                        case 'created':
+                            $message = "Discussion created successfully!";
+                            break;
+                        case 'deleted':
+                            $message = "Discussion deleted successfully!";
+                            break;
+                        default:
+                            $message = "Operation completed successfully!";
+                    }
+                    echo $message;
+                    ?>
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Set a timeout to hide the success message after 1.5 seconds with a smooth sideways transition
+    setTimeout(() => {
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.style.transform = 'translateX(100%)'; // Move the message sideways
+            successMessage.style.opacity = '0'; // Fade out the message
+            setTimeout(() => {
+                successMessage.style.display = 'none'; // Hide the element after the transition
+            }, 500); // Match the duration of the CSS transition
+        }
+    }, 1500);
+</script>
+<?php endif; ?>
+
+    
             
-            <?php if(isset($_GET['success'])): ?>
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 mx-6 mt-6">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-green-700">
-                                <?php 
-                                $message = "";
-                                switch($_GET['success']) {
-                                    case 'created':
-                                        $message = "Discussion created successfully!";
-                                        break;
-                                    case 'deleted':
-                                        $message = "Discussion deleted successfully!";
-                                        break;
-                                    default:
-                                        $message = "Operation completed successfully!";
-                                }
-                                echo $message;
-                                ?>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
+            
             
             <?php if(isset($_GET['error'])): ?>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mx-6 mt-6">

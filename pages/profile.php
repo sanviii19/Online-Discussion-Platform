@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
 // Get user data
 $user = User::getUser($_SESSION['user_id']);
 ?>
@@ -91,24 +92,45 @@ $user = User::getUser($_SESSION['user_id']);
             </svg>
                 </div>
             <!-- </div> -->
+
+           
             
             <?php if(isset($_GET['success'])): ?>
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 mx-6 mt-6">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 " id="success-message">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <i class="fas fa-check-circle text-green-500"></i>
                         </div>
-                        <div class="ml-3">
+                        <div class="ml-3" >
                             <p class="text-sm text-green-700">
                                 Profile updated successfully!
                             </p>
                         </div>
                     </div>
                 </div>
+                <style>
+    #success-message {
+        transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transition for transform and opacity */
+    }
+</style>
+
+<script>
+    // Set a timeout to hide the success message after 1.5 seconds with a smooth sideways transition
+    setTimeout(() => {
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.style.transform = 'translateX(100%)'; // Move the message sideways
+            successMessage.style.opacity = '0'; // Fade out the message
+            setTimeout(() => {
+                successMessage.style.display = 'none'; // Hide the element after the transition
+            }, 500); // Match the duration of the CSS transition
+        }
+    }, 1500);
+</script>
             <?php endif; ?>
             
             <?php if(isset($_GET['error'])): ?>
-                <div class="bg-red-50 border-l-4 border-red-500 p-4 mx-6 mt-6">
+                <div class="bg-red-50 border-l-4 border-red-500 p-4" id="error-message">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <i class="fas fa-exclamation-circle text-red-500"></i>
@@ -140,6 +162,26 @@ $user = User::getUser($_SESSION['user_id']);
                         </div>
                     </div>
                 </div>
+                <style>
+                #error-message {
+        transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transition for transform and opacity */
+    }
+</style>
+
+<script>
+    // Set a timeout to hide the success message after 1.5 seconds with a smooth sideways transition
+    setTimeout(() => {
+        const successMessage = document.getElementById('error-message');
+        if (successMessage) {
+            successMessage.style.transform = 'translateX(100%)'; // Move the message sideways
+            successMessage.style.opacity = '0'; // Fade out the message
+            setTimeout(() => {
+                successMessage.style.display = 'none'; // Hide the element after the transition
+            }, 500); // Match the duration of the CSS transition
+        }
+    }, 1500);
+</script>
+                
             <?php endif; ?>
             
             <form method="POST" enctype="multipart/form-data" class="p-6 bg-white">
