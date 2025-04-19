@@ -1,5 +1,9 @@
 Array
 (
-    [reply_id] => 7
-    [delete_reply] => 
+    [discussion_id] => 10
+    [content] => > gayrav wrote:
+> it was a good farewell party
+
+yes it was
+    [add_reply] => 
 )

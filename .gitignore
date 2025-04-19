@@ -1,1 +1,15 @@
 node_modules
+
+# Environment files
+.env
+*.env
+.env.*
+env.php
+
+# Config files that might contain sensitive information
+config/env.php
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store

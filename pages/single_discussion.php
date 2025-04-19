@@ -6,7 +6,7 @@ require_once "../models/Reply.php";
 require_once "../models/Group.php";
 require_once "../models/Likes.php";
 require_once "../models/File.php";
-
+require_once "../config/env.php";
 
 // Function to make URLs clickable
 function makeLinksClickable($text) {
@@ -549,98 +549,98 @@ if ($isLoggedIn) {
         }
 
         // Simplified AI Response Functions
-        const API_KEY = "AIzaSyDVmRxa-pn6L_eQm2Xzwa28imHGFtvenZQ";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-let aiResponseVisible = false;
-let chatHistory = [];
+        const API_KEY = "<?= getenv('GEMINI_API_KEY') ?>";
+        const API_URL = "<?= getenv('GEMINI_API_URL') ?>";
+        let aiResponseVisible = false;
+        let chatHistory = [];
 
-function toggleAiResponse() {
-    const aiSection = document.getElementById('aiResponseSection');
-    const aiButton = document.getElementById('aiButtonText');
-    const inputBox = document.getElementById('userInput');
+        function toggleAiResponse() {
+            const aiSection = document.getElementById('aiResponseSection');
+            const aiButton = document.getElementById('aiButtonText');
+            const inputBox = document.getElementById('userInput');
 
-    if (aiResponseVisible) {
-        aiSection.classList.add('hidden');
-        aiButton.textContent = 'Ask AI';
-    } else {
-        aiSection.classList.remove('hidden');
-        aiButton.textContent = 'Hide AI';
-        setTimeout(() => inputBox.focus(), 100); // Wait for DOM to show
-    }
+            if (aiResponseVisible) {
+                aiSection.classList.add('hidden');
+                aiButton.textContent = 'Ask AI';
+            } else {
+                aiSection.classList.remove('hidden');
+                aiButton.textContent = 'Hide AI';
+                setTimeout(() => inputBox.focus(), 100); // Wait for DOM to show
+            }
 
-    aiResponseVisible = !aiResponseVisible;
-}
-
-
-function askAi() {
-    toggleAiResponse();
-}
-
-function appendMessage(sender, message) {
-    const chatBox = document.getElementById('chatMessages');
-    const messageWrapper = document.createElement('div');
-
-    const isUser = sender === "You";
-
-    messageWrapper.className = `mb-4 flex ${isUser ? 'justify-end' : 'justify-start'}`;
-    messageWrapper.innerHTML = `
-    <div class="max-w-xs px-4 py-3 rounded-lg shadow-inner border border-gray-200 ${
-        isUser ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-right' : 'bg-indigo-100 text-gray-800 text-left'
-    }">
-        <div class="text-xs font-medium mb-1 ${
-            isUser ? 'text-indigo-200' : 'text-gray-500'
-        }">${sender}</div>
-        <div class="text-sm leading-relaxed whitespace-pre-wrap">${message}</div>
-    </div>
-    `;
-
-    chatBox.appendChild(messageWrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-
-
-async function sendMessage() {
-    const inputBox = document.getElementById('userInput');
-    const userMessage = inputBox.value.trim();
-    if (!userMessage) return;
-
-    appendMessage("You", userMessage);
-    inputBox.value = '';
-
-    chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-
-    document.getElementById('aiLoadingIndicator').classList.remove('hidden');
-
-    try {
-        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: chatHistory,
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 1000,
-                }
-            })
-        });
-
-        const data = await response.json();
-        document.getElementById('aiLoadingIndicator').classList.add('hidden');
-
-        if (data.candidates && data.candidates[0].content) {
-            const aiReply = data.candidates[0].content.parts[0].text;
-            appendMessage("AI", aiReply);
-            chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
-        } else {
-            appendMessage("AI", "Sorry, I couldn't generate a response.");
+            aiResponseVisible = !aiResponseVisible;
         }
-    } catch (error) {
-        document.getElementById('aiLoadingIndicator').classList.add('hidden');
-        console.error("AI error:", error);
-        appendMessage("AI", `Error: ${error.message}`);
-    }
-}
+
+
+        function askAi() {
+            toggleAiResponse();
+        }
+
+        function appendMessage(sender, message) {
+            const chatBox = document.getElementById('chatMessages');
+            const messageWrapper = document.createElement('div');
+
+            const isUser = sender === "You";
+
+            messageWrapper.className = `mb-4 flex ${isUser ? 'justify-end' : 'justify-start'}`;
+            messageWrapper.innerHTML = `
+            <div class="max-w-xs px-4 py-3 rounded-lg shadow-inner border border-gray-200 ${
+                isUser ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-right' : 'bg-indigo-100 text-gray-800 text-left'
+            }">
+                <div class="text-xs font-medium mb-1 ${
+                    isUser ? 'text-indigo-200' : 'text-gray-500'
+                }">${sender}</div>
+                <div class="text-sm leading-relaxed whitespace-pre-wrap">${message}</div>
+            </div>
+            `;
+
+            chatBox.appendChild(messageWrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+
+
+        async function sendMessage() {
+            const inputBox = document.getElementById('userInput');
+            const userMessage = inputBox.value.trim();
+            if (!userMessage) return;
+
+            appendMessage("You", userMessage);
+            inputBox.value = '';
+
+            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+            document.getElementById('aiLoadingIndicator').classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: chatHistory,
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1000,
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('aiLoadingIndicator').classList.add('hidden');
+
+                if (data.candidates && data.candidates[0].content) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    appendMessage("AI", aiReply);
+                    chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
+                } else {
+                    appendMessage("AI", "Sorry, I couldn't generate a response.");
+                }
+            } catch (error) {
+                document.getElementById('aiLoadingIndicator').classList.add('hidden');
+                console.error("AI error:", error);
+                appendMessage("AI", `Error: ${error.message}`);
+            }
+        }
 
 
         // File Upload Handling
