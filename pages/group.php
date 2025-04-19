@@ -94,10 +94,12 @@ $discussions = Discussion::getByGroupId($groupId);
                                     <a href="edit_group.php?id=<?= $groupId ?>" class="bg-white text-indigo-700 hover:bg-gray-100 font-medium px-3 py-1.5 rounded-lg shadow-sm transition-all duration-200 text-sm">
                                         <i class="fas fa-edit mr-1"></i> Edit Group
                                     </a>
-                                
-                                    <button class="bg-red-50 text-red-700 hover:bg-red-100 font-medium px-3 py-1.5 rounded-lg shadow-sm transition-all duration-200 text-sm" data-modal-toggle="deleteGroupModal">
-                                        <i class="fas fa-trash-alt mr-1"></i> Delete Group
-                                    </button>
+                                    <form action="../controllers/groupController.php" method="POST">
+                                        <input type="hidden" name="group_id" value="<?= $groupId ?>">
+                                        <button type="submit" name="delete_group" class="bg-red-50 text-red-700 hover:bg-red-100 font-medium px-3 py-1.5 rounded-lg shadow-sm transition-all duration-200 text-sm" data-modal-toggle="deleteGroupModal">
+                                            <i class="fas fa-trash-alt mr-1"></i> Delete Group
+                                        </button>
+                                    </form>
                                 <?php endif; ?>
                                 
                                 <form action="../controllers/groupController.php" method="POST" class="inline">
@@ -336,7 +338,7 @@ $discussions = Discussion::getByGroupId($groupId);
             
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center">
                 <a href="groups.php" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to Groups
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Home
                 </a>
                 <?php if($isLoggedIn): ?>
                     <a href="profile.php" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150 mt-2 sm:mt-0">

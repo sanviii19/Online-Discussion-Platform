@@ -267,7 +267,7 @@ if ($isLoggedIn) {
         
         <!-- Main Content -->
         <main class="flex-grow container mx-auto px-4 py-6">
-            <h1 class="text-4xl font-bold text-gray-800 mb-6">Study Groups Dashboard</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome Back</h1>
             
             <!-- Alerts -->
             <?php if(isset($_GET['success'])): ?>
@@ -691,7 +691,7 @@ if ($isLoggedIn) {
             <div class="container mx-auto px-4">
                 <div class="flex flex-col md:flex-row md:justify-between items-center">
                     <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                        <span class="text-xl font-bold gradient-text">DiscussionHub</span>
+                        <span class="text-xl font-bold gradient-text">Konvo</span>
                         <div class="text-gray-400 text-sm">
                             © 2025 All rights reserved
                         </div>

@@ -239,7 +239,7 @@ $user = User::getUser($_SESSION['user_id']);
             
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center">
                 <a href="discussions.php" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to Discussions
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Home
                 </a>
                 <a href="logout.php" class="text-red-600 hover:text-red-800 font-medium transition duration-150 mt-2 sm:mt-0">
     <i class="fas fa-sign-out-alt mr-1"></i> Logout
