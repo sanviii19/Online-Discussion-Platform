@@ -7,6 +7,8 @@ require_once "../controllers/authController.php";
 $isLoggedIn = isset($_SESSION['user_id']);
 $userId = $isLoggedIn ? $_SESSION['user_id'] : null;
 
+$user = User::getUser($_SESSION['user_id']);
+
 // Get user's joined groups if logged in
 $joinedGroups = $isLoggedIn ? Group::getUserGroups($userId) : [];
 
@@ -268,7 +270,7 @@ if ($isLoggedIn) {
         
         <!-- Main Content -->
         <main class="flex-grow container mx-auto px-4 py-6">
-            <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome Back!</h1>
+            <h3 class="text-4xl font-bold text-gray-800 mb-6">Welcome Back,<?= $user['name'] ?>!</h3>
             
             <!-- Alerts -->
             <style>

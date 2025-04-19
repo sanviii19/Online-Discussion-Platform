@@ -2,6 +2,13 @@
 require_once "../controllers/userController.php"; 
 require_once "../controllers/authController.php";
 
+
+
+
+
+
+
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -259,13 +266,17 @@ $user = User::getUser($_SESSION['user_id']);
                             </p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <a href="change-password.php" class="inline-flex items-center justify-center px-4 py-2 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition duration-150">
-                                    <i class="fas fa-key mr-2"></i> Change Password
-                                </a>
+                            <button 
+    type="button" 
+    onclick="openModal()" 
+    class="inline-flex items-center w-185 justify-center px-4 py-2 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition">
+    <i class="fas fa-history mr-2"></i> Change Password
+</button>
                                 
-                                <a href="account-activity.php" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-150">
+                                <!-- <button type="button" class="inline-flex items-center justify-center px-4 py-2 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition">
                                     <i class="fas fa-history mr-2"></i> View Account Activity
-                                </a>
+                                </button>
+                                 -->
                             </div>
                         </div>
                         
@@ -307,5 +318,76 @@ $user = User::getUser($_SESSION['user_id']);
             }
         }
     </script>
+<!-- Modal -->
+<!-- Modal Overlay -->
+<div id="passwordModal" class="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Content -->
+    <div class="bg-white p-6 rounded-lg w-full max-w-md relative shadow-xl border">
+        <button onclick="closeModal()" class="absolute top-2 right-3 text-gray-600 text-xl font-bold">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Change Password</h2>
+        <form id="changePasswordForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Current Password</label>
+                <input type="password" name="current_password" required class="w-full border px-3 py-2 rounded" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">New Password</label>
+                <input type="password" name="new_password" required class="w-full border px-3 py-2 rounded" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Confirm Password</label>
+                <input type="password" name="confirm_password" required class="w-full border px-3 py-2 rounded" />
+            </div>
+            <div id="passwordMessage" class="text-sm mb-3 hidden p-2 rounded"></div>
+            <div class="text-right">
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('passwordModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('passwordModal').classList.add('hidden');
+        // Clear form fields when modal closes
+        document.getElementById('changePasswordForm').reset();
+        document.getElementById('passwordMessage').classList.add('hidden');
+        document.getElementById('passwordMessage').innerHTML = '';
+    }
+
+    document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = this;
+        const formData = new FormData(form);
+        fetch('change-password.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            const messageDiv = document.getElementById('passwordMessage');
+            messageDiv.innerHTML = data;
+            messageDiv.classList.remove('hidden');
+            messageDiv.classList.remove('text-red-600', 'text-green-600');
+
+            if (data.toLowerCase().includes("success")) {
+                messageDiv.classList.add('text-green-600');
+                form.reset();
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
+            } else {
+                messageDiv.classList.add('text-red-600');
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

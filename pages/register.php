@@ -238,6 +238,17 @@
                     </div>
                 </div>
             </div>
+
+            <?php
+$errors = '';
+if (isset($_GET['error'])) {
+    if ($_GET['error'] == 'email_exists') {
+        $errors = "Email is already registered.";
+    } elseif ($_GET['error'] == 'failed') {
+        $errors = "Registration failed. Please try again.";
+    }
+}
+?>
             
             <!-- Right column - Registration Form -->
             <div class="lg:w-1/2 p-8 lg:p-12 flex items-center">
@@ -248,20 +259,22 @@
                     </div>
                     
                     <form method="POST" class="space-y-4">
-                        <?php if(isset($errors)): ?>
-                            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm text-red-700">
-                                            <?php echo $errors; ?>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                    <?php if(!empty($errors)): ?>
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700">
+                    <?php echo $errors; ?>
+                </p>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+                        
                         
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
